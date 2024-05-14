@@ -123,13 +123,15 @@ uint32_t rotWord(uint32_t word) {
 	return word;
 }
 
+// ポインタずらしで実装しようと思ったがエンディアンの問題があるので断念
 uint32_t subWord(uint32_t word) {
-	uint32_t* ptr = &word;
-	subBytes((uint8_t*)word);
-	subBytes((uint8_t*)word+);
-	subBytes((uint8_t*)word);
-	subBytes((uint8_t*)word);
-	return ((word))
+	uint32_t result = 0;
+	for (uint8_t i = 0; i < 4; i++) {
+		uint8_t byte = (word >> (i * 8)) & 0xff;
+		byte = SBOX[byte & 0xf0][byte & 0x0f];
+		result |= (byte << (i * 8));
+	}
+	return result;
 }
 
 std::vector<uint32_t> keyExpansion(std::vector<uint32_t> key) {
