@@ -19,7 +19,7 @@ AES::AES(AES_TYPE type) {
 
 AES::~AES() {}
 
-state_t AES::cipher(const state_t in, uint8_t Nr, const vector<uint32_t> w) {
+state_t AES::cipher(const state_t in, uint8_t Nr, const std::vector<uint32_t> w) {
 	state_t state;
 	state = in;
 	addRoundKey(state, w);
@@ -38,7 +38,7 @@ void AES::subBytes(state_t& state) {
 {
 	for (int i = 0; i < STATE_ROWS; i++) {
 		for (int j = 0; j < STATE_COLS; j++) {
-			state[i][j] = sbox[(state[i][j] & 0xf0) >> 4][state[i][j] & 0x0f];
+			state[i][j] = SBOX[(state[i][j] & 0xf0) >> 4][state[i][j] & 0x0f];
 		}
 	}
 	return ;
@@ -57,37 +57,84 @@ void AES::shiftRows(state_t& state) {
 	return ;
 }
 
+uint8_t AES::xTimes(uint8_t x) {
+	if (x & 0x80) {
+		return (x << 1);
+	} else {
+		return ((x << 1) ^ 0x1B);
+	}
+}
+
+// dot(x, y=3)
+// mask = 0b00000001
+// 		product + x
+// 		x <- xtimes(x) <=> x <- x・2
+// mask = 0b00000010
+// 		product + x ・ 2
+// return product = x・3
+uint8_t AES::dot(uint8_t x, uint8_t y) {
+	uint8_t product;
+
+	for (uint8_t mask = 0x01; mask; mask <<= 1) {
+		if (y & mask) {
+			product ^= x;
+		}
+		x = xTimes(x);
+	}
+	return (x);
+}
+
+// 2 3 1 1
+// 1 2 3 1
+// 1 1 2 3
+// 3 1 1 2
 void AES::mixColumns(state_t& state) {
-	// 2 3 1 1
-	// 1 2 3 1
-	// 1 1 2 3
-	// 3 1 1 2
-	state_t
+	std::array<uint8_t, STATE_ROWS> temp;
+
+	for (uint8_t col = 0; col < STATE_COLS; col++) {
+		for (uint8_t row = 0; row < STATE_ROWS; row++) {
+			temp[row] = dot(state[0][col], MIXBOX[row][col])
+						^ dot(state[1][col], MIXBOX[row][col])
+						^ dot(state[2][col], MIXBOX[row][col])
+						^ dot(state[3][col], MIXBOX[row][col]);
+		}
+		for (uint8_t row = 0; row < STATE_ROWS; row++) {
+			state[row][col] = temp[row];
+		}
+	}
 	return ;
 }
 
-//uint8_t mul2(uint8_t s) {
-//	if (s > 0x80) {
-//		return (val << 1);
-//	} else {
-//		// 既役多項式 x^8 + x^4 + x^3 + x^1 + 1
-//		// 00011011
-//		return (val << 1) ^ 0x1B;
-//	}
-//	
-//}
-//
-//uint8_t mul3(uint8_t s) {
-//	
-//}
-
-
-void AES::addRoundKey(uint8_t round, state_t& state, uint8_t w[Nb]) {
+void AES::addRoundKey(uint8_t round, state_t& state, const std::vector<uint32_t> w) {
+	for (uint8_t col = 0; col < STATE_COLS; col++) {
+		uint32_t word = w[STATE_COLS * round + col];
+		state[0][col] ^= (uint8_t)((word & 0xff000000) >> 24);
+		state[1][col] ^= (uint8_t)((word & 0x00ff0000) >> 16);
+		state[2][col] ^= (uint8_t)((word & 0x0000ff00) >> 8);
+		state[3][col] ^= (uint8_t)(word & 0x000000ff);
+	}
 	return ;
 }
 
+uint32_t rotWord(uint32_t word) {
+	uint32_t head = ((word & 0xff000000) >> 24);
+	word <<= 8;
+	word &= head;
+	return word;
+}
 
-vector<uint32_t> keyExpansion(vector<uint32_t> key);
+uint32_t subWord(uint32_t word) {
+	uint32_t* ptr = &word;
+	subBytes((uint8_t*)word);
+	subBytes((uint8_t*)word+);
+	subBytes((uint8_t*)word);
+	subBytes((uint8_t*)word);
+	return ((word))
+}
+
+std::vector<uint32_t> keyExpansion(std::vector<uint32_t> key) {
+	return ;
+}
 
 
 int main(void) {
