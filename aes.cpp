@@ -134,8 +134,77 @@ uint32_t subWord(uint32_t word) {
 	return result;
 }
 
-std::vector<uint32_t> keyExpansion(std::vector<uint32_t> key) {
-	return ;
+
+// vectorではなくarrayで、各キー用の長さの型を作り、それをtemplateでやるという
+std::vector<uint32_t> keyExpansion128(std::vector<uint32_t> key) {
+	std::vector<uint32_t> w;
+	// 1Word = 4Bytes = 32bits
+	// aes128 = 128bits = 16Bytes = 4Word
+	int i = 0;
+	while (i <= Nk - 1) {
+		w.emplace_back(key[i]);
+		i++;
+	}
+	uint32_t temp;
+	while (i <= 4 * Nr + 3) {
+		temp = w[i - 1];
+		if (i % Nk == 0) {
+			temp = subWord(rotWord((temp))) ^ RCON[i / Nk];
+		}
+		else if (Nk > 6 & (i % Nk) == 4) {
+			temp = subWord(temp);
+		}
+		i++;
+	}
+	return w;
+}
+
+std::vector<uint32_t> keyExpansion192(std::vector<uint32_t> key) {
+	std::vector<uint32_t> w;
+	// 1Word = 4Bytes = 32bits
+	// aes128 = 128bits = 16Bytes = 4Word
+	int i = 0;
+	while (i <= Nk - 1) {
+		w.emplace_back(key[i]);
+		i++;
+	}
+	uint32_t temp;
+	while (i <= 4 * Nr + 3) {
+		temp = w[i - 1];
+		if (i % Nk == 0) {
+			temp = subWord(rotWord((temp))) ^ RCON[i / Nk];
+		}
+		else if (Nk > 6 & (i % Nk) == 4) {
+			temp = subWord(temp);
+		}
+		i++;
+	}
+	return w;
+}
+
+std::vector<uint32_t> keyExpansion256(std::vector<uint32_t> key) {
+	std::vector<uint32_t> w;
+	int i = 0;
+	while (i <= Nk - 1) {
+		w.emplace_back(key[i]);
+		i++;
+	}
+	uint32_t temp;
+	while (i <= 4 * Nr + 3) {
+		temp = w[i - 1];
+		if (i % Nk == 0) {
+			temp = subWord(rotWord((temp))) ^ RCON[i / Nk];
+		}
+		else if (Nk > 6 & (i % Nk) == 4) {
+			temp = subWord(temp);
+		}
+		i++;
+	}
+	return w;
+}
+
+std::vector<uint32_t> keyExpansion256(std::vector<uint32_t> key) {
+	
 }
 
 
