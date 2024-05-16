@@ -4,9 +4,11 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <cstdint>
 
 using uint8_t = std::uint8_t;
 using uint32_t = std::uint32_t; //a.k.a. a word
+const uint8_t irreducible = 0x1B;
 const uint8_t Nb = 16; // size of block
 const uint8_t STATE_ROWS = 4;
 const uint8_t STATE_COLS = 4;
@@ -34,7 +36,7 @@ public:
 	void subBytes(state_t& state);
 	void shiftRows(state_t& state);
 	uint8_t xTimes(uint8_t x);
-	uint8_t dot(uint8_t x, uint8_t y);
+	uint8_t mul(uint8_t x, uint8_t y);
 	void mixColumns(state_t& state);
 	void addRoundKey(uint8_t round, state_t& state, const std::vector<uint32_t> w);
 	std::vector<uint32_t> keyExpansion(std::vector<uint32_t> key);
