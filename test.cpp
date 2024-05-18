@@ -1,15 +1,27 @@
 #include "aes.h"
 #include <assert.h>
 
+
 int test_cipher(AES_TYPE type) {
 	AES aes(type);
 	state_t res;
 	std::vector<uint32_t> key;
-	state_t in = {{
+	// in = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+	// state = 1 5 9 13
+	//         2 6 10 14
+	//         3 7 11 15
+	//         4 8 12 16
+	state_t t_in = {{
 		{0x32, 0x43, 0xf6, 0xa8},
 		{0x88, 0x5a, 0x30, 0x8d},
 		{0x31, 0x31, 0x98, 0xa2},
 		{0xe0, 0x37, 0x07, 0x34}
+	}};
+	state_t in = {{
+		{0x32, 0x88, 0x31, 0xe0},
+		{0x43, 0x5a, 0x31, 0x37},
+		{0xf6, 0x30, 0x98, 0x07},
+		{0xa8, 0x8d, 0xa2, 0x34}
 	}};
 	switch (type){
 		case AES_128:
@@ -21,8 +33,15 @@ int test_cipher(AES_TYPE type) {
 		case AES_256:
 			key = {0x603deb10, 0x15ca71be, 0x2b73aef0, 0x857d7781, 0x1f352c07, 0x3b6108d7, 0x2d9810a3, 0x0914dff4};
 	}
-	std::vector<uint32_t> w = aes.keyExpansion(key);
-	res = aes.cipherWithDebug(in, aes.Nr, w);
+	res = aes.cipherWithDebug(in, aes.keyExpansion(key));
+	std::cout << "Result: " << std::endl;
+	for (int i = 0; i < STATE_ROWS; i++) {
+		for (int j = 0; j < STATE_COLS; j++) {
+			printf("%02x ", res[i][j]);
+		}
+		printf("\n");
+	}
+	res = aes.invCipherWithDebug(res, aes.keyExpansion(key));
 	std::cout << "Result: " << std::endl;
 	for (int i = 0; i < STATE_ROWS; i++) {
 		for (int j = 0; j < STATE_COLS; j++) {
@@ -66,7 +85,7 @@ void test_mixColumns(AES aes) {
 
 int main() {
 	//test_mixColumns(aes);
-	test_cipher(AES_256);
+	test_cipher(AES_128);
 	//test_cipher(AES_192);
 	
 	//test_genSBox(aes);

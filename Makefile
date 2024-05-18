@@ -29,7 +29,7 @@ $(NAME_TEST):	$(OBJ) $(OBJ_TEST)
 			$(CC) $(FLAGS) $(OBJ_TEST) $(OBJ) -o $(NAME_TEST)
 
 clean:
-			$(RM) $(OBJ) $(OBJ_SERVER)
+			$(RM) $(OBJ) $(OBJ_TEST)
 
 fclean:		clean
 			$(RM) $(NAME) $(NAME_TEST)
