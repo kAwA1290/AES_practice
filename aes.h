@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
 
 using uint8_t = std::uint8_t;
 using uint32_t = std::uint32_t; //a.k.a. a word
@@ -14,13 +15,7 @@ const uint8_t STATE_ROWS = 4;
 const uint8_t STATE_COLS = 4;
 using state_t = std::array<std::array<uint8_t, STATE_ROWS>, STATE_COLS>;
 
-enum AES_MODE {
-	ECB,
-	CBC,
-	CTR,
-};
-
-enum AES_TYPE {
+enum AES_KeyLength {
 	AES_128,
 	AES_192,
 	AES_256,
@@ -28,27 +23,43 @@ enum AES_TYPE {
 
 class AES {
 public:
-	AES(AES_TYPE type);
+	AES(AES_KeyLength len);
 	~AES();
 	uint8_t Nr; // number of rounds
 	uint8_t Nk; // number of bytes in the key
-	AES_TYPE type;
-	void changeType(AES_TYPE type);
+	AES_KeyLength keyLen;
+	void changeType(AES_KeyLength len);
 	state_t cipher(state_t state, const std::vector<uint32_t> w);
 	state_t cipherWithDebug(state_t state, const std::vector<uint32_t> w);
 	state_t invCipher(state_t state, const std::vector<uint32_t> w);
 	state_t invCipherWithDebug(state_t state, const std::vector<uint32_t> w);
 	void subBytes(state_t& state, bool inverse = false);
 	void shiftRows(state_t& state, bool inverse = false);
+	void mixColumns(state_t& state, bool inverse = false);
 	uint8_t xTimes(uint8_t x);
 	uint8_t mul(uint8_t x, uint8_t y);
-	void mixColumns(state_t& state, bool inverse = false);
 	void addRoundKey(uint8_t round, state_t& state, const std::vector<uint32_t> w);
 	std::vector<uint32_t> keyExpansion(std::vector<uint32_t> key);
 	uint32_t subWord(uint32_t word);
 	uint32_t rotWord(uint32_t word);
-	void printState(state_t state);
 	uint8_t SBox(uint8_t x, bool inverse = false);
+	void printState(state_t state);
+	bool keyIsValid(std::vector<uint32_t> key);
+
+	// stringとvector<uint8_t>のみ対応
+	template<typename T>
+	typename std::enable_if<std::is_same<T,
+				std::string>::value || std::is_same<T, std::vector<uint8_t>>::value,
+				std::vector<state_t>>::type
+	toBlocks(T data, bool paddingEnabled = true);
+	void padding(state_t& state, uint8_t row, uint8_t col);
+	std::pair<uint8_t, uint8_t> findPadding(state_t& state);
+	std::string encryptECB(std::string data, std::vector<uint32_t> key);
+	std::string decryptECB(std::string data, std::vector<uint32_t> key);
+	//std::vector<uint8_t> encryptECB(std::vector<state_t> data, std::vector<uint32_t> key);
+	//std::vector<uint8_t> decryptECB(std::vector<state_t> data, std::vector<uint32_t> key);
+	//std::string encryptCBC(std::string data, std::vector<uint32_t> key, std::vector<uint8_t> iv);
+	//std::vector<uint8_t> decryptCBC(std::vector<uint8_t> data, std::vector<uint32_t> key, std::vector<uint8_t> iv);
 };
 
 const std::array<std::array<uint8_t, 4>, 4> MIXBOX = {{
