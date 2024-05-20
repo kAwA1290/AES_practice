@@ -1,3 +1,5 @@
 *.d
 *.o
-aes
+aes.a
+aes_test
+
