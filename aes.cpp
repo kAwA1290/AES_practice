@@ -271,7 +271,7 @@ std::vector<uint32_t> AES::keyExpansion(std::vector<uint32_t> key) {
 		else if (i % this->Nk == 0) {
 			temp = subWord(rotWord((temp))) ^ RCON[i / this->Nk];
 		}
-		else if (this->Nk > 6 & (i % this->Nk) == 4) {
+		else if (this->Nk > 6 && (i % this->Nk) == 4) {
 			temp = subWord(temp);
 		}
 		w[i] = w[i - this->Nk] ^ temp;
@@ -329,7 +329,7 @@ std::pair<uint8_t, uint8_t> AES::findPadding(state_t& state) {
 
 // string or vector<uint8_t> to vector<state_t>
 template<typename T>
-typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::vector<uint8_t>>::value, std::vector<state_t>>::type
+typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::vector<uint8_t> >::value, std::vector<state_t> >::type
 AES::toBlocks(T data, bool paddingEnabled/* = true*/) {
 	std::vector<state_t> blocks;
 	state_t block;
