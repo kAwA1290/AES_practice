@@ -49,8 +49,8 @@ public:
 	// stringとvector<uint8_t>のみ対応
 	template<typename T>
 	typename std::enable_if<std::is_same<T,
-				std::string>::value || std::is_same<T, std::vector<uint8_t>>::value,
-				std::vector<state_t>>::type
+				std::string>::value || std::is_same<T, std::vector<uint8_t> >::value,
+				std::vector<state_t> >::type
 	toBlocks(T data, bool paddingEnabled = true);
 	void padding(state_t& state, uint8_t row, uint8_t col);
 	std::pair<uint8_t, uint8_t> findPadding(state_t& state);
